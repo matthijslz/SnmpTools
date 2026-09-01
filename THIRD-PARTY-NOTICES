@@ -1,8 +1,11 @@
-This project uses SharpSnmpLib.
+This project includes SharpSnmpLib.
 
 SharpSnmpLib
 Copyright (c) LeXtudio Inc.
 
 Licensed under the MIT/X11 License.
 
+Project:
 https://github.com/lextudio/sharpsnmplib
+
+SnmpTools itself is not affiliated with or endorsed by LeXtudio Inc.

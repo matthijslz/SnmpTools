@@ -1,0 +1,32 @@
+# Build output
+bin/
+obj/
+
+# PowerShell Script Analyzer
+.pssa/
+
+# PowerShell Editor Services
+.history/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# NuGet
+packages/
+
+# GitHub Actions artifacts
+artifacts/
+
+# PowerShell module packaging
+*.nupkg
+
+# Backup files
+*.bak
