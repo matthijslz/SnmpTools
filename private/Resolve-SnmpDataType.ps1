@@ -40,6 +40,8 @@ function Resolve-SnmpDataType
 
         Unsigned32
         {
+            # SharpSnmpLib does not expose an Unsigned32 data class.
+            # Gauge32 is used to represent unsigned 32-bit values.
             return [Lextm.SharpSnmpLib.Gauge32]::new(
                 [uint32]$Value
             )

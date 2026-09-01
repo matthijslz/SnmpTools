@@ -1,9 +1,15 @@
 <#
 .SYNOPSIS
-[TODO]
+Sets the value of a writable SNMP OID on a target device.
 
 .DESCRIPTION
-[TODO]
+Sets the value of a writable OID on an SNMP-enabled device using
+SNMP v1, v2c or v3.
+
+The cmdlet supports multiple SNMP data types and returns the value
+reported by the device after the operation.
+
+Supports -WhatIf and -Confirm for safe execution.
 
 .PARAMETER ComputerName
 Hostname or IP address of the target device.
@@ -12,24 +18,31 @@ Hostname or IP address of the target device.
 UDP port used for SNMP communication (default is 161)
 
 .PARAMETER Oid
-One or more OIDs to retrieve.
+OID to modify.
 
 .PARAMETER NewValue
-[TODO]
+The new value to assign to the specified OID.
+
+The value is converted to the SNMP data type specified by
+the DataType parameter.
 
 .PARAMETER DataType
 Specifies the SNMP data type used when setting the value.
 
-Supported values:
+Supported values include:
 - OctetString
 - Integer32
 - Gauge32
 - Counter32
 - Unsigned32
+- TimeTicks
+- IpAddress
 
+If omitted, OctetString is used.
 
 .PARAMETER Timeout
- The timeout value in milliseconds. 0 and -1 indicate infinite timeout.
+The timeout value in milliseconds.
+0 and -1 indicate an infinite timeout.
 
 .PARAMETER Version
 SNMP version to use (V1, V2C or V3)
@@ -58,12 +71,43 @@ Set-SnmpData `
     -Oid '1.3.6.1.x.x.x' `
     -NewValue 'Printer'
 
+Sets the specified OID to the string value 'Printer'.
+
 .EXAMPLE
 Set-SnmpData `
     -ComputerName switch01 `
     -Oid '1.3.6.1.x.x.x' `
     -NewValue 1 `
     -DataType Integer32
+
+Sets the specified OID to the Integer32 value 1.
+
+.EXAMPLE
+Set-SnmpData `
+    -ComputerName switch01 `
+    -Oid '1.3.6.1.x.x.x' `
+    -NewValue '192.168.1.100' `
+    -DataType IpAddress
+
+Sets the specified OID to the IP address 192.168.1.100.
+
+.EXAMPLE
+Set-SnmpData `
+    -ComputerName switch01 `
+    -Oid '1.3.6.1.x.x.x' `
+    -NewValue 'NewLocation' `
+    -WhatIf
+
+Shows what would happen without sending the SNMP SET request.
+
+.OUTPUTS
+SnmpTools.SnmpData
+
+.NOTES
+This cmdlet only supports single OID SET operations.
+
+SNMP SET requests require the target OID to be writable and
+the supplied credentials to have write permissions.
 #>
 function Set-SnmpData
 {
