@@ -38,7 +38,7 @@ jobs:
         env:
           PSGALLERY_API_KEY: ${{ secrets.PSGALLERY_API_KEY }}
         run: |
-          if (:IsNullOrWhiteSpace($env:PSGALLERY_API_KEY)) {
+          if ([string]::IsNullOrWhiteSpace($env:PSGALLERY_API_KEY)) {
               throw "PSGALLERY_API_KEY secret is not configured."
           }
 
