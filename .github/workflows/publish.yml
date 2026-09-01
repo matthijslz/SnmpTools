@@ -1,0 +1,52 @@
+name: Publish PowerShell Module
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  publish:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Validate Manifest
+        shell: pwsh
+        run: |
+          Test-ModuleManifest .\SnmpTools.psd1
+
+      - name: Validate Version
+        shell: pwsh
+        run: |
+          $manifest = Test-ModuleManifest .\SnmpTools.psd1
+          $tag = $env:GITHUB_REF_NAME.TrimStart('v')
+
+          if ($manifest.Version.ToString() -ne $tag) {
+              throw "ModuleVersion '$($manifest.Version)' does not match release tag '$tag'"
+          }
+
+      - name: Import Module
+        shell: pwsh
+        run: |
+          Import-Module .\SnmpTools.psd1 -Force
+
+      - name: Verify PSGallery API Key
+        shell: pwsh
+        env:
+          PSGALLERY_API_KEY: ${{ secrets.PSGALLERY_API_KEY }}
+        run: |
+          if (:IsNullOrWhiteSpace($env:PSGALLERY_API_KEY)) {
+              throw "PSGALLERY_API_KEY secret is not configured."
+          }
+
+      - name: Publish Module
+        shell: pwsh
+        env:
+          PSGALLERY_API_KEY: ${{ secrets.PSGALLERY_API_KEY }}
+        run: |
+          Publish-Module `
+            -Path . `
+            -NuGetApiKey $env:PSGALLERY_API_KEY
