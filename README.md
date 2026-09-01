@@ -98,3 +98,13 @@ Set-SnmpData `
     -ComputerName switch01 `
     -Community private `
     -Oid '1.3.6.1.x.x.x'
+```
+	
+### Get-SnmpNext
+Retrieve the next OID in the MIB tree.
+
+```powershell
+Get-SnmpNext `
+    -ComputerName switch01 `
+    -Oid '1.3.6.1.2.1.1'
+```
