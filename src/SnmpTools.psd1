@@ -7,7 +7,7 @@
 
     Author = 'Matthijs Zwaan'
 
-    Description = 'PowerShell module for querying and modifying SNMP-enabled devices using SNMP v1, v2c and v3.'
+    Description = 'PowerShell module for querying and modifying SNMP-enabled devices using SNMP v1, v2c and v3. Compatible with Windows PowerShell 5.1 and PowerShell 7.'
 
     Copyright = '(c) 2026 Matthijs Zwaan. Licensed under the MIT License.'
 

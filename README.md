@@ -1,6 +1,6 @@
 # SnmpTools
 SnmpTools is a PowerShell module for querying and modifying SNMP-enabled devices.
-The module provides a PowerShell-native interface for SNMP v1, v2c and v3, built on top of SharpSnmpLib.
+The module provides a PowerShell-native interface for SNMP v1, v2c and v3, built on top of SharpSnmpLib. Compatible with Windows PowerShell 5.1 and PowerShell 7.
 
 ## Features
 - Support for SNMP v1, v2c and v3
