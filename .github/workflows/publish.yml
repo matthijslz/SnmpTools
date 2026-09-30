@@ -13,22 +13,25 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v7
 
-      - name: Copy Documentation Files
+      - name: Create staging folder
         shell: pwsh
         run: |
-          Copy-Item .\README.md .\src\
-          Copy-Item .\LICENSE .\src\
-          Copy-Item .\THIRD-PARTY-NOTICES.md .\src\
+          New-Item -ItemType Directory -Path .\publish\SnmpTools -Force
+          Copy-Item .\src\* .\publish\SnmpTools\ -Recurse
+          Copy-Item .\README.md .\publish\SnmpTools\
+          Copy-Item .\LICENSE .\publish\SnmpTools\
+          Copy-Item .\THIRD-PARTY-NOTICES.md .\publish\SnmpTools\
+          Get-ChildItem .\publish\SnmpTools
 
       - name: Validate Manifest
         shell: pwsh
         run: |
-          Test-ModuleManifest .\src\SnmpTools.psd1
+          Test-ModuleManifest .\publish\SnmpTools\SnmpTools.psd1
 
       - name: Validate Version
         shell: pwsh
         run: |
-          $manifest = Test-ModuleManifest .\src\SnmpTools.psd1
+          $manifest = Test-ModuleManifest .\publish\SnmpTools\SnmpTools.psd1
           $tag = $env:GITHUB_REF_NAME.TrimStart('v')
 
           if ($manifest.Version.ToString() -ne $tag) {
@@ -38,7 +41,7 @@ jobs:
       - name: Import Module
         shell: pwsh
         run: |
-          Import-Module .\src\SnmpTools.psd1 -Force
+          Import-Module .\publish\SnmpTools\SnmpTools.psd1 -Force
 
       - name: Verify PSGallery API Key
         shell: pwsh
@@ -54,10 +57,8 @@ jobs:
         env:
           PSGALLERY_API_KEY: ${{ secrets.PSGALLERY_API_KEY }}
         run: |
-          $modulePath = (Resolve-Path .\src\SnmpTools.psd1).Path
-
           Publish-Module `
-            -Path $modulePath `
+            -Path .\publish\SnmpTools `
             -Repository PSGallery `
             -NuGetApiKey $env:PSGALLERY_API_KEY `
             -Verbose
