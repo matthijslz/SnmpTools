@@ -16,7 +16,8 @@
     FunctionsToExport = @(
         'Get-SnmpData',
         'Set-SnmpData',
-        'Get-SnmpNext'
+        'Get-SnmpNext',
+        'Get-SnmpWalk'
     )
 
     FormatsToProcess = @(

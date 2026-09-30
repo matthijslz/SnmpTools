@@ -11,12 +11,14 @@ Add-Type -Path $assemblyPath
 # Load enums
 . "$privateFolder\SnmpVersion.ps1"
 . "$privateFolder\SnmpDataType.ps1"
+. "$privateFolder\SnmpWalkMode.ps1"
 
 # Load remaining private functions
 $excludedFiles = @(
     'Test-SnmpDependencies.ps1'
     'SnmpVersion.ps1'
     'SnmpDataType.ps1'
+    'SnmpWalkMode.ps1'
 )
 
 Get-ChildItem "$privateFolder\*.ps1" |
