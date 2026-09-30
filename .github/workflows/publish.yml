@@ -13,15 +13,22 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v7
 
+      - name: Copy Documentation Files
+        shell: pwsh
+        run: |
+          Copy-Item .\README.md .\src\
+          Copy-Item .\LICENSE .\src\
+          Copy-Item .\THIRD-PARTY-NOTICES.md .\src\
+
       - name: Validate Manifest
         shell: pwsh
         run: |
-          Test-ModuleManifest .\SnmpTools.psd1
+          Test-ModuleManifest .\src\SnmpTools.psd1
 
       - name: Validate Version
         shell: pwsh
         run: |
-          $manifest = Test-ModuleManifest .\SnmpTools.psd1
+          $manifest = Test-ModuleManifest .\src\SnmpTools.psd1
           $tag = $env:GITHUB_REF_NAME.TrimStart('v')
 
           if ($manifest.Version.ToString() -ne $tag) {
@@ -31,7 +38,7 @@ jobs:
       - name: Import Module
         shell: pwsh
         run: |
-          Import-Module .\SnmpTools.psd1 -Force
+          Import-Module .\src\SnmpTools.psd1 -Force
 
       - name: Verify PSGallery API Key
         shell: pwsh
@@ -48,5 +55,5 @@ jobs:
           PSGALLERY_API_KEY: ${{ secrets.PSGALLERY_API_KEY }}
         run: |
           Publish-Module `
-            -Path . `
+            -Path .\src `
             -NuGetApiKey $env:PSGALLERY_API_KEY
