@@ -10,36 +10,30 @@ on:
       - main
 
 jobs:
-  validate:
+  validate-powershell:
     runs-on: windows-latest
-
-    strategy:
-      matrix:
-        edition:
-          - powershell
-          - pwsh
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
 
       - name: Show PowerShell Version
-        shell: ${{ matrix.edition }}
+        shell: powershell
         run: |
           $PSVersionTable
 
       - name: Validate Manifest
-        shell: ${{ matrix.edition }}
+        shell: powershell
         run: |
           Test-ModuleManifest .\src\SnmpTools.psd1
 
       - name: Import Module
-        shell: ${{ matrix.edition }}
+        shell: powershell
         run: |
           Import-Module .\src\SnmpTools.psd1 -Force
 
       - name: Verify Exported Commands
-        shell: ${{ matrix.edition }}
+        shell: powershell
         run: |
           $manifest = Test-ModuleManifest .\src\SnmpTools.psd1
 
@@ -49,18 +43,41 @@ jobs:
           $difference = Compare-Object $expected $actual
 
           if ($difference) {
-              Write-Host "Expected exports:"
-              $expected
-
-              Write-Host ""
-              Write-Host "Actual exports:"
-              $actual
-
-              Write-Host ""
-              Write-Host "Differences:"
-              $difference | Format-Table | Out-String | Write-Host
-
               throw "Exported commands do not match manifest."
           }
 
-          Write-Host "Export validation succeeded"
+  validate-powershell-7:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Show PowerShell Version
+        shell: pwsh
+        run: |
+          $PSVersionTable
+
+      - name: Validate Manifest
+        shell: pwsh
+        run: |
+          Test-ModuleManifest .\src\SnmpTools.psd1
+
+      - name: Import Module
+        shell: pwsh
+        run: |
+          Import-Module .\src\SnmpTools.psd1 -Force
+
+      - name: Verify Exported Commands
+        shell: pwsh
+        run: |
+          $manifest = Test-ModuleManifest .\src\SnmpTools.psd1
+
+          $expected = $manifest.ExportedFunctions.Keys | Sort-Object
+          $actual = (Get-Command -Module SnmpTools).Name | Sort-Object
+
+          $difference = Compare-Object $expected $actual
+
+          if ($difference) {
+              throw "Exported commands do not match manifest."
+          }
