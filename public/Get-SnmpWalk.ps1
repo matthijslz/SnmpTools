@@ -50,9 +50,10 @@ WithinSubtree
 The default value is Default.
 
 .PARAMETER Version
-SNMP version to use.
+SNMP version to use. 
+Default version is V2C. 
 
-Supported values:
+supported values:
 - V1
 - V2C
 - V3
@@ -60,6 +61,7 @@ Supported values:
 .PARAMETER Community
 SNMP community string.
 
+Default value is 'public'.
 Only available when using SNMP v1 or SNMP v2c.
 
 .PARAMETER Username

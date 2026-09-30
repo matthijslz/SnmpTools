@@ -15,7 +15,9 @@ Supports -WhatIf and -Confirm for safe execution.
 Hostname or IP address of the target device.
 
 .PARAMETER Port
-UDP port used for SNMP communication (default is 161)
+UDP port used for SNMP communication.
+
+The default value is 161.
 
 .PARAMETER Oid
 OID to modify.
@@ -41,33 +43,69 @@ Supported values include:
 If omitted, OctetString is used.
 
 .PARAMETER Timeout
-The timeout value in milliseconds.
+Maximum time, in milliseconds, to wait for a response to each
+individual SNMP request.
+
+The default value is 5000 milliseconds. 
 0 and -1 indicate an infinite timeout.
 
 .PARAMETER Version
-SNMP version to use (V1, V2C or V3)
+SNMP version to use. 
+Default version is V2C. 
+
+supported values:
+- V1
+- V2C
+- V3
 
 .PARAMETER Community
-SNMP community string (Only V1 or V2C)
+SNMP community string.
+
+Default value is 'public'.
+Only available when using SNMP v1 or SNMP v2c.
 
 .PARAMETER Username
-SNMPv3 user name (Only V3)
+SNMPv3 user name.
+
+Only available when using SNMP v3.
 
 .PARAMETER AuthenticationProtocol
-SNMPv3 authentication protocol (Only V3)
+SNMPv3 authentication protocol.
+
+Supported values:
+- MD5
+- SHA1
+- SHA256
+- SHA384
+- SHA512
+
+Only available when using SNMP v3.
 
 .PARAMETER AuthenticationPassword
-SNMPv3 authentication password (Only V3)
+SNMPv3 authentication password.
+
+Only available when using SNMP v3.
 
 .PARAMETER PrivacyProtocol
-SNMPv3 privacy protocol (Only V3)
+SNMPv3 privacy protocol.
+
+Supported values:
+- DES
+- 3DES
+- AES
+- AES192
+- AES256
+
+Only available when using SNMP v3.
 
 .PARAMETER PrivacyPassword
-SNMPv3 privacy password (Only V3)
+SNMPv3 privacy password.
+
+Only available when using SNMP v3.
 
 .EXAMPLE
 Set-SnmpData `
-    -ComputerName switch01 `
+    -ComputerName printer `
     -Oid '1.3.6.1.x.x.x' `
     -NewValue 'Printer'
 
@@ -88,14 +126,6 @@ Set-SnmpData `
     -Oid '1.3.6.1.x.x.x' `
     -NewValue '192.168.1.100' `
     -DataType IpAddress
-
-Sets the specified OID to the IP address 192.168.1.100.
-
-.EXAMPLE
-Set-SnmpData `
-    -ComputerName switch01 `
-    -Oid '1.3.6.1.x.x.x' `
-    -NewValue 'NewLocation' `
     -WhatIf
 
 Shows what would happen without sending the SNMP SET request.
@@ -258,7 +288,8 @@ function Set-SnmpData
                     -AuthenticationPassword $AuthenticationPassword
                 $PrivacyProvider = Resolve-SnmpPrivacyProvider `
                     -AuthenticationProvider $AuthProvider `
-                    -PrivacyProtocol $PrivacyProtocol `                    -PrivacyPassword $PrivacyPassword
+                    -PrivacyProtocol $PrivacyProtocol `
+                    -PrivacyPassword $PrivacyPassword
 
                 # SNMP Discovery
                 try {

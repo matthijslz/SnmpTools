@@ -3,46 +3,48 @@ SnmpTools is a PowerShell module for querying and modifying SNMP-enabled devices
 The module provides a PowerShell-native interface for SNMP v1, v2c and v3, built on top of SharpSnmpLib.
 
 ## Features
-- SNMP v1 support
-- SNMP v2c support
-- SNMP v3 support
-- GET operations
+- Support for SNMP v1, v2c and v3
+- SNMPv3 authentication and privacy support
+- GET operations for single OID and multiple OID retrieval
 - SET operations
-- Multiple OID retrieval in a single request
-- SNMPv3 authentication support
-- SNMPv3 privacy support
+- GETNEXT operations
+- WALK operations to end of subtree or end of MIB
 - PowerShell object output
 - PowerShell formatting support
 
 ## Installation
 ### PowerShell Gallery
-
+Make sure you can install modules from the PSGallery, then simply run:
 ```powershell
 Install-Module SnmpTools
 ```
+Verify the available commands:
+```powershell
+Get-Command -Module SnmpTools
+```
 
 ### Manual Installation
-Clone or download this repository and copy the module folder to one of the paths in:
+Clone or download this repository, then import the module by path:
 ```powershell
-$env:PSModulePath -split ';'
+Import-Module "C:\Path\To\SnmpTools"
 ```
-Then import the module:
+Or copy the module files to one of the default PowerShell paths, and then import the module by name:
 ```powershell
 Import-Module SnmpTools
 ```
 
-## Supported SNMP Versions
-| Version | Supported |
-|----------|----------|
-| SNMP v1 | Yes |
-| SNMP v2c | Yes |
-| SNMP v3 noAuthNoPriv | Yes |
-| SNMP v3 authNoPriv | Yes |
-| SNMP v3 authPriv | Yes |
-
 ## Available Commands
 ### Get-SnmpData
-Retrieves one or more OIDs from an SNMP-enabled device.
+Retrieves one or more OIDs from an SNMP-enabled device. This and all other commands return data in object notation for easy further processing:
+
+```
+ComputerName : switch01
+Oid          : 1.3.6.1.2.1.1.5.0
+Type         : OctetString
+Value        : switch01
+Version      : V2C
+Timestamp    : <Current Timestamp>
+```
 
 ### Set-SnmpData
 Modifies a writable OID on an SNMP-enabled device.
@@ -56,20 +58,26 @@ Supports:
 - TimeTicks
 - IpAddress
 
-## Examples
+### Get-SnmpNext
+Retrieves the next OID in the SNMP MIB tree. See also Get-SnmpWalk for successive SNMP GETNEXT operations.
 
-### Retrieve system name (SNMP v2c)
+### Get-SnmpWalk
+Retrieves SNMP data by walking the MIB tree. By default the whole MIB tree will be walked, use `-WalkMode WithinSubtree` to only walk the specified subtree. The walk automatically stops when EndOfMibView is reached, the requested subtree is exhausted, or no further OIDs are available.
+
+## Examples
+### Retrieve system name using defaults
 ```powershell
 Get-SnmpData `
     -ComputerName switch01 `
-    -Community public `
     -Oid '1.3.6.1.2.1.1.5.0'
 ```
 
-### Retrieve multiple OIDs
+### Retrieve multiple OIDs using SNMPv1
 ```powershell
 Get-SnmpData `
-    -ComputerName printer01 `
+    -ComputerName 192.168.1.100 `
+    -Version V1 `
+    -Community private `
     -Oid @(
         '1.3.6.1.2.1.1.5.0',
         '1.3.6.1.2.1.1.1.0'
@@ -78,8 +86,13 @@ Get-SnmpData `
 
 ### Retrieve data using SNMP v3
 ```powershell
-$Password = ConvertTo-SecureString `
-    'Password123!' `
+$AuthenticationPassword = ConvertTo-SecureString `
+    'AuthenticationPassword' `
+    -AsPlainText `
+    -Force
+
+$PrivacyPassword = ConvertTo-SecureString `
+    'PrivacyPassword' `
     -AsPlainText `
     -Force
 
@@ -88,23 +101,44 @@ Get-SnmpData `
     -Version V3 `
     -Username admin `
     -AuthenticationProtocol SHA512 `
-    -AuthenticationPassword $Password `
+    -AuthenticationPassword $AuthenticationPassword `
+    -PrivacyProtocol AES `
+    -PrivacyPassword $PrivacyPassword `
     -Oid '1.3.6.1.2.1.1.5.0'
 ```
 
-### Modify a string value
+### Modify sysName.0 value using SET
 ```powershell
 Set-SnmpData `
-    -ComputerName switch01 `
-    -Community private `
-    -Oid '1.3.6.1.x.x.x'
+    -ComputerName printer01 `
+    -Version V3 `
+    -Username admin `
+    -AuthenticationProtocol SHA512 `
+    -AuthenticationPassword $AuthenticationPassword `
+    -PrivacyProtocol AES `
+    -PrivacyPassword $PrivacyPassword `
+    -Oid '1.3.6.1.2.1.1.5.0' `
+    -NewValue 'printer01' `
+    -Confirm
 ```
 	
-### Get-SnmpNext
-Retrieve the next OID in the MIB tree.
-
+### Retrieve the next OID after sysName.0 using SNMPv1.
 ```powershell
 Get-SnmpNext `
     -ComputerName switch01 `
-    -Oid '1.3.6.1.2.1.1'
+    -Oid '1.3.6.1.2.1.1.5.0' `
+    -Version V1
 ```
+### Walk the system subtree
+```powershell
+Get-SnmpWalk `
+    -ComputerName switch01 `
+    -Oid '1.3.6.1.2.1.1' `
+    -WalkMode WithinSubtree
+```
+
+## License
+SnmpTools is licensed under the MIT License.
+
+This project includes third-party software. For details, see
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

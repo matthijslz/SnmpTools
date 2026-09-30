@@ -3,43 +3,80 @@
 Retrieves SNMP data from a network device.
 
 .DESCRIPTION
-Retrieves one or more OIDs from a network device using
-SNMP version 1, 2c or 3.
-DES and 3DES are supported for compatibility with legacy devices
-but are considered cryptographically obsolete.
+Retrieves one or more OIDs from a network device.
+This cmdlet supports SNMP v1, v2c and v3.
 
 .PARAMETER ComputerName
 Hostname or IP address of the target device.
 
 .PARAMETER Port
-UDP port used for SNMP communication (default is 161)
+UDP port used for SNMP communication.
+
+The default value is 161.
 
 .PARAMETER Oid
 One or more OIDs to retrieve.
 
 .PARAMETER Timeout
- The timeout value in milliseconds. 0 and -1 indicate infinite timeout.
+Maximum time, in milliseconds, to wait for a response to each
+individual SNMP request.
+
+The default value is 5000 milliseconds. 
+0 and -1 indicate an infinite timeout.
 
 .PARAMETER Version
-SNMP version to use (V1, V2C or V3)
+SNMP version to use. 
+Default version is V2C. 
+
+supported values:
+- V1
+- V2C
+- V3
 
 .PARAMETER Community
-SNMP community string (Only V1 or V2C)
+SNMP community string.
+
+Default value is 'public'.
+Only available when using SNMP v1 or SNMP v2c.
 
 .PARAMETER Username
-SNMPv3 user name (Only V3)
+SNMPv3 user name.
+
+Only available when using SNMP v3.
 
 .PARAMETER AuthenticationProtocol
-SNMPv3 authentication protocol (Only V3)
+SNMPv3 authentication protocol.
+
+Supported values:
+- MD5
+- SHA1
+- SHA256
+- SHA384
+- SHA512
+
+Only available when using SNMP v3.
 
 .PARAMETER AuthenticationPassword
-SNMPv3 authentication password (Only V3)
+SNMPv3 authentication password.
+
+Only available when using SNMP v3.
 
 .PARAMETER PrivacyProtocol
-SNMPv3 privacy protocol (Only V3)
+SNMPv3 privacy protocol.
+
+Supported values:
+- DES
+- 3DES
+- AES
+- AES192
+- AES256
+
+Only available when using SNMP v3.
 
 .PARAMETER PrivacyPassword
-SNMPv3 privacy password (Only V3)
+SNMPv3 privacy password.
+
+Only available when using SNMP v3.
 
 .EXAMPLE
 Get-SnmpData `
@@ -67,7 +104,27 @@ Get-SnmpData `
     -AuthenticationPassword $Password `
     -Oid '1.3.6.1.2.1.1.5.0'
 
-Queries a device using SNMPv3.
+Queries a device using SNMPv3 and authNoPriv
+
+.EXAMPLE
+Get-SnmpData `
+    -ComputerName printer01 `
+    -Version V3 `
+    -Username admin `
+    -AuthenticationProtocol SHA512 `
+    -AuthenticationPassword $AuthenticationPasqsword `
+    -PrivacyProtocol AES `
+    -PrivacyPassword $PrivacyPassword `
+    -Oid '1.3.6.1.2.1.1.1.0'
+
+Queries a device using SNMPv3 and authPriv
+
+.OUTPUTS
+SnmpTools.SnmpData
+
+.NOTES
+DES and 3DES are supported for compatibility with legacy devices
+but are considered cryptographically obsolete.
 #>
 function Get-SnmpData
 {
@@ -201,7 +258,8 @@ function Get-SnmpData
                     -AuthenticationPassword $AuthenticationPassword
                 $PrivacyProvider = Resolve-SnmpPrivacyProvider `
                     -AuthenticationProvider $AuthProvider `
-                    -PrivacyProtocol $PrivacyProtocol `                    -PrivacyPassword $PrivacyPassword
+                    -PrivacyProtocol $PrivacyProtocol `
+                    -PrivacyPassword $PrivacyPassword
 
                 # SNMP Discovery
                 try {

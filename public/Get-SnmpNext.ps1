@@ -16,10 +16,12 @@ the foundation for MIB walking operations.
 Hostname or IP address of the target device.
 
 .PARAMETER Port
-UDP port used for SNMP communication (default is 161).
+UDP port used for SNMP communication.
+
+The default value is 161.
 
 .PARAMETER Oid
-The starting OID.
+The starting OID for the GETNEXT operation.
 
 The cmdlet returns the next OID and its value after the
 specified OID.
@@ -27,28 +29,62 @@ specified OID.
 .PARAMETER Timeout
 The timeout value in milliseconds.
 
+The default value is 5000 milliseconds. 
 0 and -1 indicate an infinite timeout.
 
 .PARAMETER Version
-SNMP version to use (V1, V2C or V3).
+SNMP version to use. 
+Default version is V2C. 
+
+supported values:
+- V1
+- V2C
+- V3
 
 .PARAMETER Community
-SNMP community string (Only V1 or V2C).
+SNMP community string.
+
+Default value is 'public'.
+Only available when using SNMP v1 or SNMP v2c.
 
 .PARAMETER Username
-SNMPv3 user name (Only V3).
+SNMPv3 user name.
+
+Only available when using SNMP v3.
 
 .PARAMETER AuthenticationProtocol
-SNMPv3 authentication protocol (Only V3).
+SNMPv3 authentication protocol.
+
+Supported values:
+- MD5
+- SHA1
+- SHA256
+- SHA384
+- SHA512
+
+Only available when using SNMP v3.
 
 .PARAMETER AuthenticationPassword
-SNMPv3 authentication password (Only V3).
+SNMPv3 authentication password.
+
+Only available when using SNMP v3.
 
 .PARAMETER PrivacyProtocol
-SNMPv3 privacy protocol (Only V3).
+SNMPv3 privacy protocol.
+
+Supported values:
+- DES
+- 3DES
+- AES
+- AES192
+- AES256
+
+Only available when using SNMP v3.
 
 .PARAMETER PrivacyPassword
-SNMPv3 privacy password (Only V3).
+SNMPv3 privacy password.
+
+Only available when using SNMP v3.
 
 .EXAMPLE
 Get-SnmpNext `
@@ -62,21 +98,22 @@ Returns the next OID and value after
 Get-SnmpNext `
     -ComputerName switch01 `
     -Oid '1.3.6.1.2.1.1.5.0' `
-    -Community public `
-    -Version V2C
+    -Version V1
 
-Returns the next OID after sysName.0 using SNMPv2c.
+Returns the next OID after sysName.0 using SNMPv1.
 
 .EXAMPLE
 Get-SnmpNext `
     -ComputerName switch01 `
     -Oid '1.3.6.1.2.1.1' `
     -Version V3 `
-    -Username snmpuser `
-    -AuthenticationProtocol SHA256 `
-    -AuthenticationPassword $AuthPassword
+    -Username admin `
+    -AuthenticationProtocol SHA512 `
+    -AuthenticationPassword $AuthenticationPasqsword `
+    -PrivacyProtocol AES `
+    -PrivacyPassword $PrivacyPassword `
 
-Returns the next OID using SNMPv3 authentication.
+Returns the next OID using SNMPv3 authentication and privacy.
 
 .OUTPUTS
 SnmpTools.SnmpData
@@ -85,8 +122,8 @@ SnmpTools.SnmpData
 Uses an SNMP GETNEXT request to retrieve the next OID in
 lexicographical order.
 
-This cmdlet returns a single result and can be used as the
-foundation for implementing SNMP walk operations.
+This cmdlet returns a single result and is used as the
+foundation for the SNMP walk operation.
 #>
 function Get-SnmpNext
 {
@@ -226,7 +263,8 @@ function Get-SnmpNext
                     -AuthenticationPassword $AuthenticationPassword
                 $PrivacyProvider = Resolve-SnmpPrivacyProvider `
                     -AuthenticationProvider $AuthProvider `
-                    -PrivacyProtocol $PrivacyProtocol `                    -PrivacyPassword $PrivacyPassword
+                    -PrivacyProtocol $PrivacyProtocol `
+                    -PrivacyPassword $PrivacyPassword
 
                 # SNMP Discovery
                 try {
