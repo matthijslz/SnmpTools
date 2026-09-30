@@ -54,6 +54,10 @@ jobs:
         env:
           PSGALLERY_API_KEY: ${{ secrets.PSGALLERY_API_KEY }}
         run: |
+          $modulePath = (Resolve-Path .\src\SnmpTools.psd1).Path
+
           Publish-Module `
-            -Path .\src `
-            -NuGetApiKey $env:PSGALLERY_API_KEY
+            -Path $modulePath `
+            -Repository PSGallery `
+            -NuGetApiKey $env:PSGALLERY_API_KEY `
+            -Verbose
