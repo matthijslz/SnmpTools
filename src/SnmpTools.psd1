@@ -1,7 +1,7 @@
 @{
     RootModule = 'SnmpTools.psm1'
 
-    ModuleVersion = '0.2.0'
+    ModuleVersion = '0.3.0'
 
     GUID = '422306ee-516d-49f9-af40-afc4d1438ef1'
 
@@ -42,14 +42,28 @@
             ProjectUri = 'https://github.com/matthijslz/SnmpTools'
 
             ReleaseNotes = @'
-Initial unofficial release.
+Version 0.3.0
 
-Supports:
-- SNMP v1, v2c, v3 GET
-- SNMP v1, v2c, v3 SET
-- SNMP v1, v2c, v3 GETNEXT
-- Single and multiple OID GET requests
-- Single OID SET requests with configurable SNMP data types
+New Features
+- Added Get-SnmpWalk cmdlet
+- Added SnmpWalkMode enumeration
+- Support for walking entire MIB trees
+- Support for subtree-limited walks
+
+Improvements
+- Improved module documentation
+- Updated CI/CD workflow
+
+Supported Operations
+- GET
+- SET
+- GETNEXT
+- WALK
+
+Supported Versions
+- SNMP v1
+- SNMP v2c
+- SNMP v3
 
 Built on top of SharpSnmpLib.
 SharpSnmpLib is licensed under the MIT/X11 License.
