@@ -27,14 +27,11 @@ jobs:
         run: |
           Test-ModuleManifest .\src\SnmpTools.psd1
 
-      - name: Import Module
+      - name: Verify Module Import and Exported Functions
         shell: powershell
         run: |
           Import-Module .\src\SnmpTools.psd1 -Force
-
-      - name: Verify Exported Commands
-        shell: powershell
-        run: |
+          
           $manifest = Test-ModuleManifest .\src\SnmpTools.psd1
 
           $expected = $manifest.ExportedFunctions.Keys | Sort-Object
@@ -62,20 +59,17 @@ jobs:
         shell: pwsh
         run: |
           Test-ModuleManifest .\src\SnmpTools.psd1
-
-      - name: Import Module
+      
+      - name: Verify Module Import and Exported Functions
         shell: pwsh
         run: |
           Import-Module .\src\SnmpTools.psd1 -Force
-
-      - name: Verify Exported Commands
-        shell: pwsh
-        run: |
+          
           $manifest = Test-ModuleManifest .\src\SnmpTools.psd1
 
           $expected = $manifest.ExportedFunctions.Keys | Sort-Object
           $actual = (Get-Command -Module SnmpTools).Name | Sort-Object
-
+          
           $difference = Compare-Object $expected $actual
 
           if ($difference) {
