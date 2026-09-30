@@ -8,22 +8,17 @@ $publicFolder  = Join-Path $PSScriptRoot 'public'
 $assemblyPath = Test-SnmpDependencies
 Add-Type -Path $assemblyPath
 
-# Load enums
-. "$privateFolder\SnmpVersion.ps1"
-. "$privateFolder\SnmpDataType.ps1"
-. "$privateFolder\SnmpWalkMode.ps1"
+# Load types (enums, classes, exceptions)
+Get-ChildItem "$privateFolder\Types\*.ps1" |
+    Sort-Object Name |
+        ForEach-Object {
+            . $_.FullName
+        }
 
-# Load remaining private functions
-$excludedFiles = @(
-    'Test-SnmpDependencies.ps1'
-    'SnmpVersion.ps1'
-    'SnmpDataType.ps1'
-    'SnmpWalkMode.ps1'
-)
-
+# Load private functions
 Get-ChildItem "$privateFolder\*.ps1" |
     Sort-Object Name |
-    Where-Object Name -notin $excludedFiles |
+    Where-Object Name -ne 'Test-SnmpDependencies.ps1' |
     ForEach-Object {
         . $_.FullName
     }
