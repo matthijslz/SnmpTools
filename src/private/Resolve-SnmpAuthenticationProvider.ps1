@@ -8,7 +8,7 @@ function Resolve-SnmpAuthenticationProvider
     # SNMPv3 with noAuthNoPriv
     if ([string]::IsNullOrEmpty($AuthenticationProtocol))
     {
-        return [Lextm.SharpSnmpLib.Security.DefaultAuthenticationProvider]::new()
+        return [Lextm.SharpSnmpLib.Security.DefaultAuthenticationProvider]::Instance
     }
 
     # Convert the password from securestring via plaintext to octetstring
