@@ -9,7 +9,7 @@ $assemblyPath = Test-SnmpDependencies
 Add-Type -Path $assemblyPath
 
 # Load types (enums, classes, exceptions)
-Get-ChildItem "$privateFolder\Types\*.ps1" |
+Get-ChildItem "$privateFolder\types\*.ps1" |
     Sort-Object Name |
         ForEach-Object {
             . $_.FullName
