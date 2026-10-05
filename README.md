@@ -26,7 +26,7 @@ Get-Command -Module SnmpTools
 ### Manual Installation
 Clone or download this repository, then import the module by path:
 ```powershell
-Import-Module "C:\Path\To\SnmpTools\src"
+Import-Module "C:\Path\To\SnmpTools\src\SnmpTools.psm1"
 ```
 Or copy the module files in the src folder to one of the default PowerShell paths, and then import the module by name:
 ```powershell
