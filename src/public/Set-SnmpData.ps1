@@ -139,8 +139,7 @@ This cmdlet only supports single OID SET operations.
 SNMP SET requests require the target OID to be writable and
 the supplied credentials to have write permissions.
 #>
-function Set-SnmpData
-{
+function Set-SnmpData {
     [OutputType('SnmpTools.SnmpData')]
     [CmdletBinding(
         DefaultParameterSetName = 'Community',
@@ -153,7 +152,7 @@ function Set-SnmpData
         [string]$ComputerName,
 
         [Parameter()]
-        [ValidateRange(1,65535)]
+        [ValidateRange(1, 65535)]
         [int]$Port = 161,
 
         [Parameter(Mandatory)]
@@ -168,7 +167,7 @@ function Set-SnmpData
         [SnmpDataType]$DataType = [SnmpDataType]::OctetString,
 
         [Parameter()]
-        [ValidateRange(-1,2147483647)]
+        [ValidateRange(-1, 2147483647)]
         [int]$Timeout = 5000,
 
         [Parameter(ParameterSetName = 'Community')]
@@ -222,104 +221,38 @@ function Set-SnmpData
             -AuthenticationPassword $AuthenticationPassword `
             -PrivacyProtocol $PrivacyProtocol `
             -PrivacyPassword $PrivacyPassword
-
-        # Validate supplied address and resolve endpoint
-        $Endpoint = Resolve-SnmpEndpoint -ComputerName $ComputerName -Port $Port
-
-        # Resolve SNMP version code
-        $VersionCode = Resolve-SnmpVersion $Version
-
-        # Set the timestamp
-        $Timestamp = Get-Date
     }
 
     process {
+        # Validate supplied address and resolve endpoint
+        $Endpoint = Resolve-SnmpEndpoint -ComputerName $ComputerName -Port $Port
+
+        # Set the timestamp
+        $Timestamp = Get-Date
+        
         # Add support for -WhatIf and -Confirm
         if (-not $PSCmdlet.ShouldProcess(
-            "$ComputerName ($Oid)",
-            "Set value to '$NewValue'"
-        )) {
+                "$ComputerName ($Oid)",
+                "Set value to '$NewValue'"
+            )) {
             return
         }
         
-        # Create a list of variable to send in SNMP communication to the endpoint
-        $Variables = [System.Collections.Generic.List[Lextm.SharpSnmpLib.Variable]]::new()
-        $Variables.Add(
-            [Lextm.SharpSnmpLib.Variable]::new(
-                [Lextm.SharpSnmpLib.ObjectIdentifier]::new($Oid),
-                (Resolve-SnmpDataType -DataType $DataType -Value $NewValue)
-        ))
+        # Invoke SNMP SET command
+        $reply = Invoke-SnmpSet `
+            -Endpoint $Endpoint `
+            -Oid $Oid `
+            -Version $Version `
+            -Timeout $Timeout `
+            -Community $Community `
+            -Username $Username `
+            -AuthenticationProtocol $AuthenticationProtocol `
+            -AuthenticationPassword $AuthenticationPassword `
+            -PrivacyProtocol $PrivacyProtocol `
+            -PrivacyPassword $PrivacyPassword
 
-        # Start communication depending on SNMP version
-        switch ($PSCmdlet.ParameterSetName) {
-            'Community' {
-                try {
-                    $data = [Lextm.SharpSnmpLib.Messaging.Messenger]::Set($VersionCode, $Endpoint, $Community, $Variables, $Timeout)
-                } catch {
-                    throw "SNMP $Version error: $($_.Exception.Message)"
-                }
-            }
-
-            'V3' {
-                # Build auth and privacy providers
-                $AuthProvider = Resolve-SnmpAuthenticationProvider `
-                    -AuthenticationProtocol $AuthenticationProtocol `
-                    -AuthenticationPassword $AuthenticationPassword
-                $PrivacyProvider = Resolve-SnmpPrivacyProvider `
-                    -AuthenticationProvider $AuthProvider `
-                    -PrivacyProtocol $PrivacyProtocol `
-                    -PrivacyPassword $PrivacyPassword
-
-                # SNMP Discovery
-                try {
-                    $Discovery = [Lextm.SharpSnmpLib.Messaging.Messenger]::GetNextDiscovery([Lextm.SharpSnmpLib.SnmpType]::SetRequestPdu)
-                    $Report = $Discovery.GetResponse($Timeout, $Endpoint)
-                } catch {
-                    throw "SNMP $Version discovery failed: $($_.Exception.Message)"
-                }
-
-                # SNMP Request
-                try {
-                    $Request = [Lextm.SharpSnmpLib.Messaging.SetRequestMessage]::new(
-                        $VersionCode,
-                        [Lextm.SharpSnmpLib.Messaging.Messenger]::NextMessageId,
-                        [Lextm.SharpSnmpLib.Messaging.Messenger]::NextRequestId,
-                        [Lextm.SharpSnmpLib.OctetString]::new($Username),
-                        $Variables,
-                        $PrivacyProvider,
-                        $Report
-                    )
-                    $Reply = [Lextm.SharpSnmpLib.Messaging.SnmpMessageExtension]::GetResponse(
-                        $Request,
-                        $Timeout,
-                        $Endpoint
-                    )
-                } catch {
-                    throw "SNMP $Version request failed $($_.Exception.Message)"
-                }
-
-                # Check for agent errors
-                if ($Reply.Scope.Pdu.ErrorStatus.ToInt32() -ne 0) {
-                    throw (
-                        "SNMP {0} error returned by device {1}. ErrorStatus: {2}, ErrorIndex: {3}" -f
-                        $Version,
-                        $Endpoint.Address,
-                        $Reply.Scope.Pdu.ErrorStatus,
-                        $Reply.Scope.Pdu.ErrorIndex
-                    )
-                }
-                $data = $Reply.Scope.Pdu.Variables
-            }
-
-            default {
-                throw "Unsupported parameter set: $($PSCmdlet.ParameterSetName)"
-            }
-        }
-
-        #
         # Return objects
-        #
-        foreach ($Variable in $data) {
+        foreach ($Variable in $reply) {
             New-SnmpDataObject `
                 -ComputerName $ComputerName `
                 -Variable $Variable `
