@@ -14,6 +14,8 @@ Supports -Quiet for simple success/failure output.
 .PARAMETER ComputerName
 Hostname or IP address of the target device.
 
+Accepts pipeline input directly and by property name.
+
 .PARAMETER Port
 UDP port used for SNMP communication.
 
@@ -123,6 +125,12 @@ Tests connectivity to the SNMP-enabled device at switch01 using
 SNMP version 3 with the specified username, authentication protocol, 
 authentication password, privacy protocol, and privacy password.
 
+.EXAMPLE
+'printer01','printer02','switch01' |
+    Test-SnmpConnection
+
+Tests SNMP connectivity to multiple devices.
+
 .OUTPUTS
 SnmpTools.ConnectionTest
 
@@ -150,7 +158,11 @@ function Test-SnmpConnection {
     )]
     param (
         # General required parameters
-        [Parameter(Mandatory)]
+        [Parameter(
+            Mandatory,
+            ValueFromPipeline,
+            ValueFromPipelineByPropertyName
+        )]
         [Alias('IPAddress')]
         [string]$ComputerName,
 
@@ -222,6 +234,8 @@ function Test-SnmpConnection {
     }
 
     process {
+        Write-Verbose "Processing $ComputerName"
+        
         # Resolve the SNMP endpoint
         $Endpoint = Resolve-SnmpEndpoint `
             -ComputerName $ComputerName `

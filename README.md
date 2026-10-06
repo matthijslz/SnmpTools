@@ -9,6 +9,8 @@ The module provides a PowerShell-native interface for SNMP v1, v2c and v3, built
 - SET operations
 - GETNEXT operations
 - WALK operations to end of subtree or end of MIB
+- Operation to test SNMP connection
+- All public cmdlets support pipeline input for `ComputerName`.
 - PowerShell object output
 - PowerShell formatting support
 
@@ -63,6 +65,10 @@ Retrieves the next OID in the SNMP MIB tree. See also Get-SnmpWalk for successiv
 
 ### Get-SnmpWalk
 Retrieves SNMP data by walking the MIB tree. By default the whole MIB tree will be walked, use `-WalkMode WithinSubtree` to only walk the specified subtree. The walk automatically stops when EndOfMibView is reached, the requested subtree is exhausted, or no further OIDs are available.
+
+### Test-SnmpConnection
+Verifies that an SNMP-enabled device is reachable and responds to SNMP requests using the specified credentials. The cmdlet performs a GET request against the specified OID and returns information about the success or failure of the test.
+Supports `-Quiet` for simple success/failure output.
 
 ## Examples
 ### Retrieve system name using defaults
@@ -135,6 +141,25 @@ Get-SnmpWalk `
     -ComputerName switch01 `
     -Oid '1.3.6.1.2.1.1' `
     -WalkMode WithinSubtree
+```
+
+### Test connection of multiple devices
+```powershell
+'printer01','printer02','switch01' |
+    Test-SnmpConnection `
+        -Version V1
+```
+### Test connection of a single device without info (returns boolean)
+```powershell
+Test-SnmpConnection 
+    -ComputerName device `
+    -Version V3 `
+    -Username admin `
+    -AuthenticationProtocol SHA512 `
+    -AuthenticationPassword $AuthenticationPassword `
+    -PrivacyProtocol AES `
+    -PrivacyPassword $PrivacyPassword `
+    -Quiet
 ```
 
 ## License

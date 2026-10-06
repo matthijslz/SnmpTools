@@ -14,6 +14,8 @@ Supports -WhatIf and -Confirm for safe execution.
 .PARAMETER ComputerName
 Hostname or IP address of the target device.
 
+Accepts pipeline input directly and by property name.
+
 .PARAMETER Port
 UDP port used for SNMP communication.
 
@@ -147,7 +149,11 @@ function Set-SnmpData {
     )]
     param (
         # General required parameters
-        [Parameter(Mandatory)]
+        [Parameter(
+            Mandatory,
+            ValueFromPipeline,
+            ValueFromPipelineByPropertyName
+        )]
         [Alias('IPAddress')]
         [string]$ComputerName,
 
@@ -224,6 +230,8 @@ function Set-SnmpData {
     }
 
     process {
+        Write-Verbose "Processing $ComputerName"
+        
         # Validate supplied address and resolve endpoint
         $Endpoint = Resolve-SnmpEndpoint -ComputerName $ComputerName -Port $Port
 
@@ -260,9 +268,9 @@ function Set-SnmpData {
         
         # Invoke SNMP SET command and return results
         Invoke-SnmpSet @invokeParams |
-            ConvertFrom-SnmpVariable `
-                -ComputerName $ComputerName `
-                -Version $Version `
-                -Timestamp $Timestamp
+        ConvertFrom-SnmpVariable `
+            -ComputerName $ComputerName `
+            -Version $Version `
+            -Timestamp $Timestamp
     }
 }

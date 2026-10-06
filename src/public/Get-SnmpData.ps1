@@ -9,6 +9,8 @@ This cmdlet supports SNMP v1, v2c and v3.
 .PARAMETER ComputerName
 Hostname or IP address of the target device.
 
+Accepts pipeline input directly and by property name.
+
 .PARAMETER Port
 UDP port used for SNMP communication.
 
@@ -133,7 +135,11 @@ function Get-SnmpData {
     )]
     param (
         # General required parameters
-        [Parameter(Mandatory)]
+        [Parameter(
+            Mandatory,
+            ValueFromPipeline,
+            ValueFromPipelineByPropertyName
+        )]
         [Alias('IPAddress')]
         [string]$ComputerName,
 
@@ -203,6 +209,8 @@ function Get-SnmpData {
     }
 
     process {
+        Write-Verbose "Processing $ComputerName"
+        
         # Validate supplied address and resolve endpoint
         $Endpoint = Resolve-SnmpEndpoint -ComputerName $ComputerName -Port $Port
 
@@ -229,9 +237,9 @@ function Get-SnmpData {
 
         # Get SNMP data and return the results
         Invoke-SnmpGet @invokeParams | 
-            ConvertFrom-SnmpVariable `
-                -ComputerName $ComputerName `
-                -Version $Version `
-                -Timestamp $Timestamp
+        ConvertFrom-SnmpVariable `
+            -ComputerName $ComputerName `
+            -Version $Version `
+            -Timestamp $Timestamp
     }
 }
