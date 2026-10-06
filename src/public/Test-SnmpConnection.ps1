@@ -210,37 +210,16 @@ function Test-SnmpConnection
 
     begin {
         Write-Verbose "Selected parameter set: $($PSCmdlet.ParameterSetName)"
-
-        # Validate ParameterSet and Version combination
-        if($PSCmdlet.ParameterSetName -eq 'Community' -and $Version -eq [SnmpVersion]::V3) {
-            throw "SNMP version V3 cannot be used with the Community parameter set."
-        }
-        if ($PSCmdlet.ParameterSetName -eq 'V3' -and $Version -ne [SnmpVersion]::V3) {
-            throw "Parameter set 'V3' requires -Version V3."
-        }
-
-        # Authentication pair validation
-        if ($AuthenticationProtocol -and -not $AuthenticationPassword) {
-            throw "AuthenticationPassword is required when AuthenticationProtocol is specified."
-        }
-
-        if ($AuthenticationPassword -and -not $AuthenticationProtocol) {
-            throw "AuthenticationProtocol is required when AuthenticationPassword is specified."
-        }
-
-        # Privacy pair validation
-        if ($PrivacyProtocol -and -not $PrivacyPassword) {
-            throw "PrivacyPassword is required when PrivacyProtocol is specified."
-        }
-
-        if ($PrivacyPassword -and -not $PrivacyProtocol) {
-            throw "PrivacyProtocol is required when PrivacyPassword is specified."
-        }
-
-        # Privacy without Authentication is not possible
-        if (($PrivacyProtocol -or $PrivacyPassword) -and -not $AuthenticationProtocol) {
-            throw "Privacy settings require authentication."
-        }
+        
+        # Validate SNMP parameters
+        Test-SnmpParameters `
+            -Version $Version `
+            -Community $Community `
+            -Username $Username `
+            -AuthenticationProtocol $AuthenticationProtocol `
+            -AuthenticationPassword $AuthenticationPassword `
+            -PrivacyProtocol $PrivacyProtocol `
+            -PrivacyPassword $PrivacyPassword
     }
 
     process {

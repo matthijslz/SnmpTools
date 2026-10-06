@@ -15,6 +15,14 @@ Get-ChildItem "$privateFolder\types\*.ps1" |
             . $_.FullName
         }
 
+# Load validate folder
+Get-ChildItem "$(Join-Path $PSScriptRoot "validate")\*.ps1" |
+    Sort-Object Name |
+    Where-Object Name -ne 'Test-SnmpDependencies.ps1' |
+    ForEach-Object {
+        . $_.FullName
+    }
+
 # Load private functions
 Get-ChildItem "$privateFolder\*.ps1" |
     Sort-Object Name |
