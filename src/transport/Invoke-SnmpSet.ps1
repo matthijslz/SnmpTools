@@ -11,7 +11,12 @@ function Invoke-SnmpSet {
         [SnmpVersion]$Version,
 
         [Parameter(Mandatory)]
-        [int]$Timeout,
+        [ValidateNotNullOrEmpty()]
+        [object]$NewValue,
+
+        [SnmpDataType]$DataType = [SnmpDataType]::OctetString,
+        
+        [int]$Timeout = 5000,
 
         [string]$Community,
 
