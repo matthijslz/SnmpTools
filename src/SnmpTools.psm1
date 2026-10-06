@@ -4,42 +4,34 @@ $publicFolder = Join-Path $PSScriptRoot 'public'
 # Load bootstrap functions required to load dependencies
 . "$privateFolder\Test-SnmpDependencies.ps1"
 
-# Load SharpSnmpLib
+# Load SharpSnmpLib assembly
 $assemblyPath = Test-SnmpDependencies
 Add-Type -Path $assemblyPath
 
-# Load types (enums, classes, exceptions)
-Get-ChildItem "$privateFolder\types\*.ps1" |
-Sort-Object Name |
-ForEach-Object {
-    . $_.FullName
-}
+# Load order is important, types should be loaded first
+$privateLoadOrder = @(
+    'types'
+    'providers'
+    'validation'
+    'transport'
+)
 
-# Load validate folder
-Get-ChildItem "$(Join-Path $PSScriptRoot "validate")\*.ps1" |
-Sort-Object Name |
-ForEach-Object {
-    . $_.FullName
-}
-
-# Load transport folder
-Get-ChildItem "$(Join-Path $PSScriptRoot "transport")\*.ps1" |
-Sort-Object Name |
-ForEach-Object {
-    . $_.FullName
-}
-
-# Load private functions
-Get-ChildItem "$privateFolder\*.ps1" |
-Sort-Object Name |
-Where-Object Name -ne 'Test-SnmpDependencies.ps1' |
-ForEach-Object {
-    . $_.FullName
+# Load private functions in the specified order
+foreach ($folder in $privateLoadOrder) {
+    $path = Join-Path $privateFolder $folder
+    if (-not (Test-Path $path)) {
+        continue
+    }
+    Get-ChildItem $path -Filter '*.ps1' |
+        Sort-Object Name |
+        ForEach-Object {
+            . $_.FullName
+        }
 }
 
 # Load public functions
-Get-ChildItem "$publicFolder\*.ps1" |
-Sort-Object Name |
-ForEach-Object {
-    . $_.FullName
-}
+Get-ChildItem $publicFolder -Filter '*.ps1' |
+    Sort-Object Name |
+    ForEach-Object {
+        . $_.FullName
+    }
