@@ -213,9 +213,6 @@ function Get-SnmpNext {
         # Validate supplied address and resolve endpoint
         $Endpoint = Resolve-SnmpEndpoint -ComputerName $ComputerName -Port $Port
 
-        # Set the timestamp
-        $Timestamp = Get-Date
-
         # Prepare parameters for Invoke-SnmpGetnext
         $invokeParams = @{
             Endpoint = $Endpoint
@@ -235,10 +232,6 @@ function Get-SnmpNext {
         }
 
         # Get SNMP data and return the results
-        Invoke-SnmpGetnext @invokeParams | 
-        ConvertFrom-SnmpVariable `
-            -ComputerName $ComputerName `
-            -Version $Version `
-            -Timestamp $Timestamp
+        Invoke-SnmpGetnext @invokeParams
     }
 }

@@ -234,9 +234,6 @@ function Set-SnmpData {
         
         # Validate supplied address and resolve endpoint
         $Endpoint = Resolve-SnmpEndpoint -ComputerName $ComputerName -Port $Port
-
-        # Set the timestamp
-        $Timestamp = Get-Date
         
         # Add support for -WhatIf and -Confirm
         if (-not $PSCmdlet.ShouldProcess(
@@ -267,10 +264,6 @@ function Set-SnmpData {
         }
         
         # Invoke SNMP SET command and return results
-        Invoke-SnmpSet @invokeParams |
-        ConvertFrom-SnmpVariable `
-            -ComputerName $ComputerName `
-            -Version $Version `
-            -Timestamp $Timestamp
+        Invoke-SnmpSet @invokeParams
     }
 }

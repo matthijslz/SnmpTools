@@ -120,5 +120,7 @@ function Invoke-SnmpGetnext {
     }
         
     # Return objects
-    return $Reply.Scope.Pdu.Variables
+    return $Reply.Scope.Pdu.Variables | ConvertFrom-SnmpVariable `
+        -ComputerName $Endpoint.Address.ToString() `
+        -Version $Version
 }

@@ -42,6 +42,8 @@ function Invoke-SnmpSet {
             (Resolve-SnmpDataType -DataType $DataType -Value $NewValue)
         ))
 
+
+
     switch ($Version) {
         # SNMP v1 and v2c
         { $_ -in ([SnmpVersion]::V1, [SnmpVersion]::V2C) } {
@@ -111,7 +113,9 @@ function Invoke-SnmpSet {
                     $Reply.Scope.Pdu.ErrorIndex
                 )
             }
-            return $Reply.Scope.Pdu.Variables
+            return $Reply.Scope.Pdu.Variables | ConvertFrom-SnmpVariable `
+                -ComputerName $Endpoint.Address.ToString() `
+                -Version $Version
         }
 
         default {

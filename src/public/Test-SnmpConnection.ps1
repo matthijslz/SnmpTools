@@ -283,8 +283,8 @@ function Test-SnmpConnection {
                 ErrorMessage = $errorMessage
                 ResponseTime = $stopwatch.ElapsedMilliseconds
                 Oid          = $Oid
-                Type         = if ($reply) { $reply.Data.GetType().Name } else { $null }
-                Value        = if ($reply) { $reply.Data.ToString() } else { $null }
+                Type         = if ($reply) { $reply.Type } else { $null }
+                Value        = if ($reply) { $reply.Value } else { $null }
             }
         }
     }

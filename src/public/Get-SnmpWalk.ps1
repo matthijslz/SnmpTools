@@ -256,8 +256,8 @@ function Get-SnmpWalk {
         $CurrentOid = $Oid
         
         while ($true) {
-            # Retrieve the next SNMP data point using Get-SnmpNext
             try {
+                # Retrieve the next SNMP data point using Get-SnmpNext
                 $Next = Invoke-SnmpGetnext `
                     -Endpoint $Endpoint `
                     -Oid $CurrentOid `
@@ -269,6 +269,9 @@ function Get-SnmpWalk {
                     -AuthenticationPassword $AuthenticationPassword `
                     -PrivacyProtocol $PrivacyProtocol `
                     -PrivacyPassword $PrivacyPassword
+                
+                # Return the next SNMP data point
+                $Next
             }
             catch {
                 Write-Verbose "Walk terminated: $($_.Exception.Message)"
@@ -282,32 +285,27 @@ function Get-SnmpWalk {
             }
 
             # If the next OID indicates the end of the MIB view, we should stop.
-            if ($Next.Data.GetType() -eq 'EndOfMibView') {
+            if ($Next.Type -eq 'EndOfMibView') {
                 Write-Verbose "Walk completed: End of MIB view reached."
                 break
             }
 
             # If the next OID is the same as the current OID, we have a loop and should stop.
-            if ($Next.Id -eq $CurrentOid) {
+            if ($Next.Oid -eq $CurrentOid) {
                 throw "SNMP walk detected a loop at OID '$($Next.Id)'."
             }
 
             # We need to check if the next OID is still within the subtree of the base OID.
-            $InsideSubtree = $Next.Id -eq $Oid -or $Next.Id.ToString().StartsWith("$Oid.")
+            $InsideSubtree = $Next.Oid -eq $Oid -or $Next.Oid.StartsWith("$Oid.")
 
             # If the walk mode is set to WithinSubtree and the next OID is outside the subtree, we should stop.
             if ($WalkMode -eq [SnmpWalkMode]::WithinSubtree -and -not $InsideSubtree) {
-                Write-Verbose "Walk completed: OID '$($Next.Id)' is outside the subtree."
+                Write-Verbose "Walk completed: OID '$($Next.Oid)' is outside the subtree."
                 break
             } 
 
-            # Return the next SNMP data point
-            $Next | ConvertFrom-SnmpVariable `
-                -ComputerName $ComputerName `
-                -Version $Version
-            
             # Update the OID parameter for the next iteration
-            $CurrentOid = $Next.Id
+            $CurrentOid = $Next.Oid
         }
     }
 }

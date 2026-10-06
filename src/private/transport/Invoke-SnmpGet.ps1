@@ -106,7 +106,9 @@ function Invoke-SnmpGet {
                     $Reply.Scope.Pdu.ErrorIndex
                 )
             }
-            return $Reply.Scope.Pdu.Variables
+            return $Reply.Scope.Pdu.Variables | ConvertFrom-SnmpVariable `
+                -ComputerName $Endpoint.Address.ToString() `
+                -Version $Version
         }
 
         default {
