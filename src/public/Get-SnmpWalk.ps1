@@ -161,8 +161,7 @@ The cmdlet automatically terminates when:
 - A loop is detected and an exception is thrown
 - An SNMP communication error occurs.
 #>
-function Get-SnmpWalk
-{
+function Get-SnmpWalk {
     [OutputType('SnmpTools.SnmpData')]
     [CmdletBinding(
         DefaultParameterSetName = 'Community'
@@ -174,7 +173,7 @@ function Get-SnmpWalk
         [string]$ComputerName,
 
         [Parameter()]
-        [ValidateRange(1,65535)]
+        [ValidateRange(1, 65535)]
         [int]$Port = 161,
 
         [Parameter(Mandatory)]
@@ -182,7 +181,7 @@ function Get-SnmpWalk
         [string]$Oid,
 
         [Parameter()]
-        [ValidateRange(-1,2147483647)]
+        [ValidateRange(-1, 2147483647)]
         [int]$Timeout = 5000,
 
         [Parameter()]
@@ -242,33 +241,26 @@ function Get-SnmpWalk
     }
 
     process {
-        # Preserve the original OID as subtree boundary
-        $BaseOid = $Oid
+        # Validate supplied address and resolve endpoint
+        $Endpoint = Resolve-SnmpEndpoint -ComputerName $ComputerName -Port $Port
         
-        # Create parameters to use for Get-SnmpNext communication
-        $params = @{
-            ComputerName = $ComputerName
-            Port         = $Port
-            Oid          = $BaseOid
-            Timeout      = $Timeout
-            Version      = $Version
-        }
-
-        if ($PSCmdlet.ParameterSetName -eq 'Community') {
-            $params.Community = $Community
-        }
-        else {
-            $params.Username = $Username
-            $params.AuthenticationProtocol = $AuthenticationProtocol
-            $params.AuthenticationPassword = $AuthenticationPassword
-            $params.PrivacyProtocol = $PrivacyProtocol
-            $params.PrivacyPassword = $PrivacyPassword
-        }
-
+        # Set the next OID to the provided OID
+        $CurrentOid = $Oid
+        
         while ($true) {
             # Retrieve the next SNMP data point using Get-SnmpNext
             try {
-                $Next = Get-SnmpNext @Params
+                $Next = Invoke-SnmpGetnext `
+                    -Endpoint $Endpoint `
+                    -Oid $CurrentOid `
+                    -Version $Version `
+                    -Timeout $Timeout `
+                    -Community $Community `
+                    -Username $Username `
+                    -AuthenticationProtocol $AuthenticationProtocol `
+                    -AuthenticationPassword $AuthenticationPassword `
+                    -PrivacyProtocol $PrivacyProtocol `
+                    -PrivacyPassword $PrivacyPassword
             }
             catch {
                 Write-Verbose "Walk terminated: $($_.Exception.Message)"
@@ -282,31 +274,34 @@ function Get-SnmpWalk
             }
 
             # If the next OID indicates the end of the MIB view, we should stop.
-            if ($Next.Type -eq 'EndOfMibView') {
+            if ($Next.Data.GetType() -eq 'EndOfMibView') {
                 Write-Verbose "Walk completed: End of MIB view reached."
                 break
             }
 
             # If the next OID is the same as the current OID, we have a loop and should stop.
-            if ($Next.Oid -eq $params.Oid) {
-                throw "SNMP walk detected a loop at OID '$($Next.Oid)'."
+            if ($Next.Id -eq $CurrentOid) {
+                throw "SNMP walk detected a loop at OID '$($Next.Id)'."
             }
 
             # We need to check if the next OID is still within the subtree of the base OID.
-            $InsideSubtree = $Next.Oid -eq $BaseOid -or $Next.Oid.StartsWith("$BaseOid.")
+            $InsideSubtree = $Next.Id -eq $Oid -or $Next.Id.ToString().StartsWith("$Oid.")
 
             # If the walk mode is set to WithinSubtree and the next OID is outside the subtree, we should stop.
             if ($WalkMode -eq [SnmpWalkMode]::WithinSubtree -and -not $InsideSubtree) {
-                Write-Verbose "Walk completed: OID '$($Next.Oid)' is outside the subtree."
+                Write-Verbose "Walk completed: OID '$($Next.Id)' is outside the subtree."
                 break
             } 
 
             # Return the next SNMP data point
-            $Next
-
+            New-SnmpDataObject `
+                -ComputerName $ComputerName `
+                -Variable $Next `
+                -Version $Version `
+                -Timestamp (Get-Date)
+            
             # Update the OID parameter for the next iteration
-            $params.Oid = $Next.Oid
+            $CurrentOid = $Next.Id
         }
-
     }
 }
