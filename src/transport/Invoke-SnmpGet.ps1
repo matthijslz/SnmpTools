@@ -110,7 +110,7 @@ function Invoke-SnmpGet {
         }
 
         default {
-            throw "Unsupported parameter set: $($PSCmdlet.ParameterSetName)"
+            throw "Unsupported SNMP version: $Version"
         }
     }
 }
