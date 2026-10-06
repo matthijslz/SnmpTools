@@ -294,11 +294,9 @@ function Get-SnmpWalk {
             } 
 
             # Return the next SNMP data point
-            New-SnmpDataObject `
+            $Next | ConvertFrom-SnmpVariable `
                 -ComputerName $ComputerName `
-                -Variable $Next `
-                -Version $Version `
-                -Timestamp (Get-Date)
+                -Version $Version
             
             # Update the OID parameter for the next iteration
             $CurrentOid = $Next.Id

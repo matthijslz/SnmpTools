@@ -237,27 +237,32 @@ function Set-SnmpData {
             )) {
             return
         }
-        
-        # Invoke SNMP SET command
-        $reply = Invoke-SnmpSet `
-            -Endpoint $Endpoint `
-            -Oid $Oid `
-            -Version $Version `
-            -Timeout $Timeout `
-            -Community $Community `
-            -Username $Username `
-            -AuthenticationProtocol $AuthenticationProtocol `
-            -AuthenticationPassword $AuthenticationPassword `
-            -PrivacyProtocol $PrivacyProtocol `
-            -PrivacyPassword $PrivacyPassword
 
-        # Return objects
-        foreach ($Variable in $reply) {
-            New-SnmpDataObject `
+        # Prepare parameters for Invoke-SnmpSet
+        $invokeParams = @{
+            Endpoint = $Endpoint
+            Version  = $Version
+            Timeout  = $Timeout
+            Oid      = $Oid
+            NewValue = $NewValue
+            DataType = $DataType
+        }
+        if ($PSCmdlet.ParameterSetName -eq 'Community') {
+            $invokeParams.Community = $Community
+        }
+        else {
+            $invokeParams.Username = $Username
+            $invokeParams.AuthenticationProtocol = $AuthenticationProtocol
+            $invokeParams.AuthenticationPassword = $AuthenticationPassword
+            $invokeParams.PrivacyProtocol = $PrivacyProtocol
+            $invokeParams.PrivacyPassword = $PrivacyPassword
+        }
+        
+        # Invoke SNMP SET command and return results
+        Invoke-SnmpSet @invokeParams |
+            ConvertFrom-SnmpVariable `
                 -ComputerName $ComputerName `
-                -Variable $Variable `
                 -Version $Version `
                 -Timestamp $Timestamp
-        }
     }
 }

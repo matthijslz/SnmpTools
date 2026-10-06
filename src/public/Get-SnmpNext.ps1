@@ -208,26 +208,29 @@ function Get-SnmpNext {
         # Set the timestamp
         $Timestamp = Get-Date
 
-        # Get SNMP data
-        $reply = Invoke-SnmpGetnext `
-            -Endpoint $Endpoint `
-            -Oid $Oid `
-            -Version $Version `
-            -Timeout $Timeout `
-            -Community $Community `
-            -Username $Username `
-            -AuthenticationProtocol $AuthenticationProtocol `
-            -AuthenticationPassword $AuthenticationPassword `
-            -PrivacyProtocol $PrivacyProtocol `
-            -PrivacyPassword $PrivacyPassword
-        
-        # Return objects
-        foreach ($Variable in $reply) {
-            New-SnmpDataObject `
+        # Prepare parameters for Invoke-SnmpGetnext
+        $invokeParams = @{
+            Endpoint = $Endpoint
+            Version  = $Version
+            Timeout  = $Timeout
+            Oid      = $Oid
+        }
+        if ($PSCmdlet.ParameterSetName -eq 'Community') {
+            $invokeParams.Community = $Community
+        }
+        else {
+            $invokeParams.Username = $Username
+            $invokeParams.AuthenticationProtocol = $AuthenticationProtocol
+            $invokeParams.AuthenticationPassword = $AuthenticationPassword
+            $invokeParams.PrivacyProtocol = $PrivacyProtocol
+            $invokeParams.PrivacyPassword = $PrivacyPassword
+        }
+
+        # Get SNMP data and return the results
+        Invoke-SnmpGetnext @invokeParams | 
+            ConvertFrom-SnmpVariable `
                 -ComputerName $ComputerName `
-                -Variable $Variable `
                 -Version $Version `
                 -Timestamp $Timestamp
-        }
     }
 }
