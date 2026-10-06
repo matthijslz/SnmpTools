@@ -143,8 +143,7 @@ A successful result indicates:
 When -Quiet is specified, the cmdlet returns only
 True or False.
 #>
-function Test-SnmpConnection
-{
+function Test-SnmpConnection {
     [OutputType('SnmpTools.ConnectionTest')]
     [CmdletBinding(
         DefaultParameterSetName = 'Community'
@@ -156,14 +155,14 @@ function Test-SnmpConnection
         [string]$ComputerName,
 
         [Parameter()]
-        [ValidateRange(1,65535)]
+        [ValidateRange(1, 65535)]
         [int]$Port = 161,
 
         [Parameter()]
         [string]$Oid = "1.3.6.1.2.1.1.1.0", #sysDescr
 
         [Parameter()]
-        [ValidateRange(-1,2147483647)]
+        [ValidateRange(-1, 2147483647)]
         [int]$Timeout = 5000,
 
         [Parameter()]
@@ -223,46 +222,45 @@ function Test-SnmpConnection
     }
 
     process {
-        # Create parameters to use for Get-SnmpData communication
-        $params = @{
-            ComputerName = $ComputerName
-            Port         = $Port
-            Oid          = $Oid
-            Timeout      = $Timeout
-            Version      = $Version
-        }
-
-        if ($PSCmdlet.ParameterSetName -eq 'Community') {
-            $params.Community = $Community
-        }
-        else {
-            $params.Username = $Username
-            $params.AuthenticationProtocol = $AuthenticationProtocol
-            $params.AuthenticationPassword = $AuthenticationPassword
-            $params.PrivacyProtocol = $PrivacyProtocol
-            $params.PrivacyPassword = $PrivacyPassword
-        }
-
-        # Attempt to get SNMP data and measure response time
+        # Resolve the SNMP endpoint
+        $Endpoint = Resolve-SnmpEndpoint `
+            -ComputerName $ComputerName `
+            -Port $Port
+        
+        # Initialize variables and start the stopwatch for measuring response time
         $success = $false
-        $Reply = $null
+        $reply = $null
         $errorMessage = $null
         $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 
+        # Attempt to get SNMP data
         try {
-            $Reply = Get-SnmpData @params
+            $reply = Invoke-SnmpGet `
+                -Endpoint $Endpoint `
+                -Oid $Oid `
+                -Version $Version `
+                -Timeout $Timeout `
+                -Community $Community `
+                -Username $Username `
+                -AuthenticationProtocol $AuthenticationProtocol `
+                -AuthenticationPassword $AuthenticationPassword `
+                -PrivacyProtocol $PrivacyProtocol `
+                -PrivacyPassword $PrivacyPassword
             $success = $true
         }
         catch {
             # Failed to get SNMP data
             $errorMessage = $_.Exception.Message
-        } finally {
+        }
+        finally {
             $stopwatch.Stop()
         } 
 
+        # If Quiet is specified, return only the success state, otherwise return a detailed object
         if ($Quiet) {
             $success
-        } else {
+        }
+        else {
             [PSCustomObject]@{
                 PSTypeName   = 'SnmpTools.ConnectionTest'
                 ComputerName = $ComputerName
@@ -271,11 +269,9 @@ function Test-SnmpConnection
                 ErrorMessage = $errorMessage
                 ResponseTime = $stopwatch.ElapsedMilliseconds
                 Oid          = $Oid
-                Type         = if ($Reply) { $Reply.Type } else { $null }
-                Value        = if ($Reply) { $Reply.Value } else { $null }
+                Type         = if ($reply) { $reply.Data.GetType().Name } else { $null }
+                Value        = if ($reply) { $reply.Data.ToString() } else { $null }
             }
         }
-
-        
     }
 }
