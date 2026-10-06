@@ -1,7 +1,7 @@
 @{
     RootModule = 'SnmpTools.psm1'
 
-    ModuleVersion = '0.3.0'
+    ModuleVersion = '0.4.0'
 
     GUID = '422306ee-516d-49f9-af40-afc4d1438ef1'
 
@@ -17,7 +17,8 @@
         'Get-SnmpData',
         'Set-SnmpData',
         'Get-SnmpNext',
-        'Get-SnmpWalk'
+        'Get-SnmpWalk',
+        'Test-SnmpConnection'
     )
 
     FormatsToProcess = @(
@@ -42,31 +43,13 @@
             ProjectUri = 'https://github.com/matthijslz/SnmpTools'
 
             ReleaseNotes = @'
-Version 0.3.0
+Version 0.4.0
 
 New Features
-- Added Get-SnmpWalk cmdlet
-- Added SnmpWalkMode enumeration
-- Support for walking entire MIB trees
-- Support for subtree-limited walks
-
-Improvements
-- Improved module documentation
-- Updated CI/CD workflow
-
-Supported Operations
-- GET
-- SET
-- GETNEXT
-- WALK
-
-Supported Versions
-- SNMP v1
-- SNMP v2c
-- SNMP v3
-
-Built on top of SharpSnmpLib.
-SharpSnmpLib is licensed under the MIT/X11 License.
+- Added Test-SnmpConnection cmdlet to verify SNMP connectivity and authentication.
+- Added pipeline support for `ComputerName` on all public cmdlets.
+- Officially validated compatibility with PowerShell 7.
+- Refactored SNMP communications into an internal transport layer.
 '@
         }
     }
