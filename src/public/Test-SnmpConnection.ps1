@@ -235,12 +235,7 @@ function Test-SnmpConnection {
 
     process {
         Write-Verbose "Processing $ComputerName"
-        
-        # Resolve the SNMP endpoint
-        $Endpoint = Resolve-SnmpEndpoint `
-            -ComputerName $ComputerName `
-            -Port $Port
-        
+                
         # Initialize variables and start the stopwatch for measuring response time
         $success = $false
         $reply = $null
@@ -250,7 +245,8 @@ function Test-SnmpConnection {
         # Attempt to get SNMP data
         try {
             $reply = Invoke-SnmpGet `
-                -Endpoint $Endpoint `
+                -ComputerName $ComputerName `
+                -Port $Port `
                 -Oid $Oid `
                 -Version $Version `
                 -Timeout $Timeout `

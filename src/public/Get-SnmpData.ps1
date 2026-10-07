@@ -211,15 +211,13 @@ function Get-SnmpData {
     process {
         Write-Verbose "Processing $ComputerName"
         
-        # Validate supplied address and resolve endpoint
-        $Endpoint = Resolve-SnmpEndpoint -ComputerName $ComputerName -Port $Port
-        
         # Prepare parameters for Invoke-SnmpGet
         $invokeParams = @{
-            Endpoint = $Endpoint
-            Version  = $Version
-            Timeout  = $Timeout
-            Oid      = $Oid
+            ComputerName    = $ComputerName
+            Port            = $Port
+            Version         = $Version
+            Timeout         = $Timeout
+            Oid             = $Oid
         }
         if ($PSCmdlet.ParameterSetName -eq 'Community') {
             $invokeParams.Community = $Community

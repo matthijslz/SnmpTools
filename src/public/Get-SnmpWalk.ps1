@@ -249,9 +249,6 @@ function Get-SnmpWalk {
     process {
         Write-Verbose "Processing $ComputerName"
         
-        # Validate supplied address and resolve endpoint
-        $Endpoint = Resolve-SnmpEndpoint -ComputerName $ComputerName -Port $Port
-        
         # Set the next OID to the provided OID
         $CurrentOid = $Oid
         
@@ -259,7 +256,8 @@ function Get-SnmpWalk {
             try {
                 # Retrieve the next SNMP data point using Get-SnmpNext
                 $Next = Invoke-SnmpGetnext `
-                    -Endpoint $Endpoint `
+                    -ComputerName $ComputerName `
+                    -Port $Port `
                     -Oid $CurrentOid `
                     -Version $Version `
                     -Timeout $Timeout `

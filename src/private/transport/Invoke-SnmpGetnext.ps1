@@ -2,7 +2,10 @@ function Invoke-SnmpGetnext {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
-        [System.Net.IPEndPoint]$Endpoint,
+        [string]$ComputerName,
+
+        [Parameter(Mandatory)]
+        [int]$Port,
 
         [Parameter(Mandatory)]
         [string[]]$Oid,
@@ -25,6 +28,9 @@ function Invoke-SnmpGetnext {
 
         [securestring]$PrivacyPassword
     )
+
+    # Resolve endpoint
+    $Endpoint = Resolve-SnmpEndpoint -ComputerName $ComputerName -Port $Port
 
     # Resolve SNMP version code
     $VersionCode = Resolve-SnmpVersion $Version
@@ -121,6 +127,6 @@ function Invoke-SnmpGetnext {
         
     # Return objects
     return $Reply.Scope.Pdu.Variables | ConvertFrom-SnmpVariable `
-        -ComputerName $Endpoint.Address.ToString() `
+        -ComputerName $ComputerName `
         -Version $Version
 }

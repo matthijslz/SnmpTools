@@ -232,9 +232,6 @@ function Set-SnmpData {
     process {
         Write-Verbose "Processing $ComputerName"
         
-        # Validate supplied address and resolve endpoint
-        $Endpoint = Resolve-SnmpEndpoint -ComputerName $ComputerName -Port $Port
-        
         # Add support for -WhatIf and -Confirm
         if (-not $PSCmdlet.ShouldProcess(
                 "$ComputerName ($Oid)",
@@ -245,12 +242,13 @@ function Set-SnmpData {
 
         # Prepare parameters for Invoke-SnmpSet
         $invokeParams = @{
-            Endpoint = $Endpoint
-            Version  = $Version
-            Timeout  = $Timeout
-            Oid      = $Oid
-            NewValue = $NewValue
-            DataType = $DataType
+            ComputerName    = $ComputerName
+            Port            = $Port
+            Version         = $Version
+            Timeout         = $Timeout
+            Oid             = $Oid
+            NewValue        = $NewValue
+            DataType        = $DataType
         }
         if ($PSCmdlet.ParameterSetName -eq 'Community') {
             $invokeParams.Community = $Community
