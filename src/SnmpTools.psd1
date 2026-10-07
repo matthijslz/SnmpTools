@@ -14,11 +14,12 @@
     PowerShellVersion = '5.1'
 
     FunctionsToExport = @(
+        'Test-SnmpConnection',
         'Get-SnmpData',
         'Set-SnmpData',
         'Get-SnmpNext',
         'Get-SnmpWalk',
-        'Test-SnmpConnection'
+        'Get-SnmpBulk'
     )
 
     FormatsToProcess = @(
