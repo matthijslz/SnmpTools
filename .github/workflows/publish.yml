@@ -80,14 +80,40 @@ jobs:
           echo $releaseNotes >> $env:GITHUB_OUTPUT
           echo "EOF" >> $env:GITHUB_OUTPUT
       
-      - name: Create GitHub Release with Assets
+      - name: Create NuGet package
+        shell: pwsh
+        run: |
+          # Create local repository for publishing the module
+          $repo = Join-Path $PWD 'LocalRepo'
+          New-Item -ItemType Directory -Path $repo -Force | Out-Null
+          Register-PSRepository `
+            -Name LocalRepo `
+            -SourceLocation $repo `
+            -PublishLocation $repo `
+            -InstallationPolicy Trusted
+
+          # Publish the module to the local repository to create the .nupkg file
+          Publish-Module `
+            -Path .\publish\SnmpTools `
+            -Repository LocalRepo `
+            -NuGetApiKey 'local' `
+            -Verbose
+
+          # Validate and copy .nupkg
+          $nupkg = Get-ChildItem -Path $repo -Filter '*.nupkg' -ErrorAction Stop | Select-Object -First 1
+          if (-not $nupkg) {
+            throw "No .nupkg file was created. Check Publish-Module output above."
+          }
+          Copy-Item -Path $nupkg.FullName -Destination .\publish\SnmpTools\ -Force
+
+      - name: Create GitHub Release with NuGet package
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ github.ref_name }}
           name: SnmpTools v${{ needs.Validate.outputs.version }}
           body: ${{ steps.releasenotes.outputs.RELEASE_NOTES }}
           files: |
-            ./publish/SnmpTools/*
+            ./publish/SnmpTools/*.nupkg
 
   Publish:
     needs: [Validate, Release]
