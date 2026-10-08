@@ -1,7 +1,7 @@
 @{
     RootModule = 'SnmpTools.psm1'
 
-    ModuleVersion = '0.4.0'
+    ModuleVersion = '0.5.0'
 
     GUID = '422306ee-516d-49f9-af40-afc4d1438ef1'
 
@@ -45,13 +45,10 @@
             ProjectUri = 'https://github.com/matthijslz/SnmpTools'
 
             ReleaseNotes = @'
-Version 0.4.0
-
 New Features
-- Added Test-SnmpConnection cmdlet to verify SNMP connectivity and authentication.
-- Added pipeline support for `ComputerName` on all public cmdlets.
-- Officially validated compatibility with PowerShell 7.
-- Refactored SNMP communications into an internal transport layer.
+- Added SNMP GETBULK support for SNMPv2c and SNMPv3.
+- Replaced PSCustomObject output types with PowerShell classes.
+- Improved module structure and internal maintainability.
 '@
         }
     }
