@@ -1,17 +1,40 @@
-name: Publish PowerShell Module
+name: Release and publish PowerShell Module
 
 on:
-  release:
-    types:
-      - published
+  push:
+    tags:
+      - 'v*.*.*'
 
 jobs:
-  publish:
+  Validate:
     runs-on: windows-latest
-
+    outputs:
+      version: ${{ steps.validate-version.outputs.version }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
+
+      - name: Validate Manifest
+        shell: pwsh
+        run: |
+          Test-ModuleManifest .\src\SnmpTools.psd1
+
+      - name: Validate Version
+        id: validate-version
+        shell: pwsh
+        run: |
+          $manifest = Test-ModuleManifest .\src\SnmpTools.psd1
+          $tag = $env:GITHUB_REF_NAME.TrimStart('v')
+
+          if ($manifest.Version.ToString() -ne $tag) {
+              throw "ModuleVersion '$($manifest.Version)' does not match release tag '$tag'"
+          }
+          echo "version=$($manifest.Version)" >> $env:GITHUB_OUTPUT
+      
+      - name: Test import of module
+        shell: pwsh
+        run: |
+          Import-Module .\src\SnmpTools.psd1 -Force
 
       - name: Create staging folder
         shell: pwsh
@@ -23,25 +46,59 @@ jobs:
           Copy-Item .\THIRD-PARTY-NOTICES.md .\publish\SnmpTools\
           Get-ChildItem .\publish\SnmpTools
 
-      - name: Validate Manifest
-        shell: pwsh
-        run: |
-          Test-ModuleManifest .\publish\SnmpTools\SnmpTools.psd1
+      - name: Upload Staging Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: module-staging
+          path: ./publish/SnmpTools/
+  
+  Release:
+    needs: Validate
+    runs-on: windows-latest
 
-      - name: Validate Version
+    steps:
+      - name: Download Staging Artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: module-staging
+          path: ./publish/SnmpTools/    
+
+      - name: Extract Release Notes from Manifest
+        id: releasenotes
         shell: pwsh
         run: |
           $manifest = Test-ModuleManifest .\publish\SnmpTools\SnmpTools.psd1
-          $tag = $env:GITHUB_REF_NAME.TrimStart('v')
+          $releaseNotes = $manifest.ReleaseNotes
+          $tag = $env:GITHUB_REF_NAME
 
-          if ($manifest.Version.ToString() -ne $tag) {
-              throw "ModuleVersion '$($manifest.Version)' does not match release tag '$tag'"
+          if (-not $releaseNotes) {
+              $releaseNotes = "See changelog at https://github.com/${{ github.repository }}/releases/tag/$tag"
           }
 
-      - name: Import Module
-        shell: pwsh
-        run: |
-          Import-Module .\publish\SnmpTools\SnmpTools.psd1 -Force
+          # Handle multiline safely for GITHUB_OUTPUT
+          echo "RELEASE_NOTES<<EOF" >> $env:GITHUB_OUTPUT
+          echo $releaseNotes >> $env:GITHUB_OUTPUT
+          echo "EOF" >> $env:GITHUB_OUTPUT
+      
+      - name: Create GitHub Release with Assets
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: SnmpTools v${{ needs.Validate.outputs.version }}
+          body: ${{ steps.releasenotes.outputs.RELEASE_NOTES }}
+          files: |
+            ./publish/SnmpTools/*
+
+  Publish:
+    needs: [Validate, Release]
+    runs-on: windows-latest
+
+    steps:
+      - name: Download Staging Artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: module-staging
+          path: ./publish/SnmpTools/ 
 
       - name: Verify PSGallery API Key
         shell: pwsh
@@ -51,7 +108,7 @@ jobs:
           if ([string]::IsNullOrWhiteSpace($env:PSGALLERY_API_KEY)) {
               throw "PSGALLERY_API_KEY secret is not configured."
           }
-
+      
       - name: Publish Module
         shell: pwsh
         env:
