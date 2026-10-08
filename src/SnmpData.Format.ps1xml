@@ -8,7 +8,7 @@
       <Name>SnmpDataTable</Name>
 
       <ViewSelectedBy>
-        <TypeName>SnmpTools.SnmpData</TypeName>
+        <TypeName>SnmpData</TypeName>
       </ViewSelectedBy>
 
       <TableControl>

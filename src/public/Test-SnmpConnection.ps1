@@ -132,7 +132,7 @@ authentication password, privacy protocol, and privacy password.
 Tests SNMP connectivity to multiple devices.
 
 .OUTPUTS
-SnmpTools.ConnectionTest
+ConnectionTest
 
 Returns a connection test result containing the
 target device, SNMP version, success state,
@@ -271,17 +271,16 @@ function Test-SnmpConnection {
             $success
         }
         else {
-            [PSCustomObject]@{
-                PSTypeName   = 'SnmpTools.ConnectionTest'
-                ComputerName = $ComputerName
-                Version      = $Version
-                Success      = $success
-                ErrorMessage = $errorMessage
-                ResponseTime = $stopwatch.ElapsedMilliseconds
-                Oid          = $Oid
-                Type         = if ($reply) { $reply.Type } else { $null }
-                Value        = if ($reply) { $reply.Value } else { $null }
-            }
+            [SnmpConnectionTest]::new(
+                $ComputerName,
+                $Version,
+                $success,
+                $errorMessage,
+                $stopwatch.ElapsedMilliseconds,
+                $Oid,
+                $(if ($reply) { $reply.Type } else { $null }),
+                $(if ($reply) { $reply.Value } else { $null })
+            )
         }
     }
 }

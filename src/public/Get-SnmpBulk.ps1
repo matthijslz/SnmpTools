@@ -146,7 +146,7 @@ Retrieves interface data using SNMPv3 with authentication
 and privacy enabled.
 
 .OUTPUTS
-SnmpTools.SnmpData
+SnmpData
 
 Returns one or more SnmpTools.SnmpData objects representing
 the OIDs and values returned by the remote SNMP agent.
@@ -163,7 +163,7 @@ Some SNMP agents may impose implementation-specific limits on
 the number of values returned in a single GETBULK response.
 #>
 function Get-SnmpBulk {
-    [OutputType('SnmpTools.SnmpData')]
+    [OutputType([SnmpData])]
     [CmdletBinding(
         DefaultParameterSetName = 'Community'
     )]

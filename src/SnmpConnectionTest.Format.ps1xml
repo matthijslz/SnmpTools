@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Configuration>
+
+  <ViewDefinitions>
+
+    <View>
+      <Name>SnmpConnectionTestTable</Name>
+
+      <ViewSelectedBy>
+        <TypeName>SnmpConnectionTest</TypeName>
+      </ViewSelectedBy>
+
+      <TableControl>
+
+        <AutoSize />
+
+        <TableHeaders>
+
+          <TableColumnHeader>
+            <Label>ComputerName</Label>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Version</Label>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Success</Label>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>ResponseTime</Label>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Value</Label>
+          </TableColumnHeader>
+
+        </TableHeaders>
+
+        <TableRowEntries>
+
+          <TableRowEntry>
+
+            <TableColumnItems>
+
+              <TableColumnItem>
+                <PropertyName>ComputerName</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>Version</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>Success</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>ResponseTime</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>Value</PropertyName>
+              </TableColumnItem>
+
+            </TableColumnItems>
+
+          </TableRowEntry>
+
+        </TableRowEntries>
+
+      </TableControl>
+
+    </View>
+  </ViewDefinitions>
+
+</Configuration>

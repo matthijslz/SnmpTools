@@ -118,7 +118,7 @@ Get-SnmpNext `
 Returns the next OID using SNMPv3 authentication and privacy.
 
 .OUTPUTS
-SnmpTools.SnmpData
+SnmpData
 
 .NOTES
 Uses an SNMP GETNEXT request to retrieve the next OID in
@@ -128,7 +128,7 @@ This cmdlet returns a single result and is used as the
 foundation for the SNMP walk operation.
 #>
 function Get-SnmpNext {
-    [OutputType('SnmpTools.SnmpData')]
+    [OutputType([SnmpData])]
     [CmdletBinding(
         DefaultParameterSetName = 'Community'
     )]

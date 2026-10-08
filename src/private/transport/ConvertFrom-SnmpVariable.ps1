@@ -14,16 +14,15 @@ function ConvertFrom-SnmpVariable {
     )
 
     process {
-        # Return a PSCustomObject with the SNMP data
-        [PSCustomObject]@{
-            PSTypeName   = 'SnmpTools.SnmpData'
-            ComputerName = $ComputerName
-            Oid          = $Variable.Id.ToString()
-            Type         = $Variable.Data.GetType().Name
-            RawValue     = $Variable.Data
-            Value        = $Variable.Data.ToString()
-            Version      = $Version
-            Timestamp    = $Timestamp
-        }
+        # Return a SnmpData object with the relevant information from the SNMP variable
+        [SnmpData]::new(
+            $ComputerName,
+            $Variable.Id.ToString(),
+            $Variable.Data.GetType().Name,
+            $Variable.Data,
+            $Variable.Data.ToString(),
+            $Version,
+            $Timestamp
+        )
     }
 }

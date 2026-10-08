@@ -23,7 +23,8 @@
     )
 
     FormatsToProcess = @(
-        'SnmpTools.Format.ps1xml'
+        'SnmpData.Format.ps1xml',
+        'SnmpConnectionTest.Format.ps1xml'
     )
 
     PrivateData = @{

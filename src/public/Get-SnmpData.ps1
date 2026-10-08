@@ -122,14 +122,14 @@ Get-SnmpData `
 Queries a device using SNMPv3 and authPriv
 
 .OUTPUTS
-SnmpTools.SnmpData
+SnmpData
 
 .NOTES
 DES and 3DES are supported for compatibility with legacy devices
 but are considered cryptographically obsolete.
 #>
 function Get-SnmpData {
-    [OutputType('SnmpTools.SnmpData')]
+    [OutputType([SnmpData])]
     [CmdletBinding(
         DefaultParameterSetName = 'Community'
     )]

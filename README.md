@@ -70,6 +70,17 @@ Retrieves SNMP data by walking the MIB tree. By default the whole MIB tree will 
 Verifies that an SNMP-enabled device is reachable and responds to SNMP requests using the specified credentials. The cmdlet performs a GET request against the specified OID and returns information about the success or failure of the test.
 Supports `-Quiet` for simple success/failure output.
 
+## Formatting
+SnmpTools includes custom formatting definitions for its output types. PowerShell may display objects using either a table view or a list view, depending on the number of returned objects and the formatting context.
+
+To explicitly use the module's table view use `| Format-Table`
+```powershell
+Get-SnmpData -ComputerName switch01 -Oid 1.3.6.1.2.1.1.1.0,1.3.6.1.2.1.1.5.0 | Format-Table
+```
+```powershell
+'switch01', 'switch02' | Test-SnmpConnection -Version V1 | Format-Table 
+```
+
 ## Examples
 ### Retrieve system name using defaults
 ```powershell

@@ -148,7 +148,7 @@ Walks the System subtree using SNMPv3 authentication and
 privacy.
 
 .OUTPUTS
-SnmpTools.SnmpData
+SnmpData
 
 .NOTES
 This cmdlet performs successive SNMP GETNEXT operations to
@@ -164,7 +164,7 @@ The cmdlet automatically terminates when:
 - An SNMP communication error occurs.
 #>
 function Get-SnmpWalk {
-    [OutputType('SnmpTools.SnmpData')]
+    [OutputType([SnmpData])]
     [CmdletBinding(
         DefaultParameterSetName = 'Community'
     )]

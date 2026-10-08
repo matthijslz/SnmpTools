@@ -133,7 +133,7 @@ Set-SnmpData `
 Shows what would happen without sending the SNMP SET request.
 
 .OUTPUTS
-SnmpTools.SnmpData
+SnmpData
 
 .NOTES
 This cmdlet only supports single OID SET operations.
@@ -142,7 +142,7 @@ SNMP SET requests require the target OID to be writable and
 the supplied credentials to have write permissions.
 #>
 function Set-SnmpData {
-    [OutputType('SnmpTools.SnmpData')]
+    [OutputType([SnmpData])]
     [CmdletBinding(
         DefaultParameterSetName = 'Community',
         SupportsShouldProcess = $true
